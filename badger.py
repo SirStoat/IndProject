@@ -1,4 +1,4 @@
-
+import graphspace_utils, json_utils, gen_utils
 
 
 def readIn():
@@ -8,7 +8,6 @@ def readIn():
     File = open('BadgerInfo.txt')
     info = File.read()
     File.close()
-
 
     info = info.split('\n')
     head = info.pop(0)
@@ -31,4 +30,3 @@ def readIn():
             network[badger][badgers[j]] = row[j]
 
     return badgerDemo, network
-        
