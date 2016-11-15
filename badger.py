@@ -116,9 +116,10 @@ def makeHistogram(inGroup, matrix):
     plt.plot(nn, pIG, 'or')
     plt.xlabel('Number of neighbors')
     plt.ylabel('Percent of neighbors in social group')
+    print 'Badger ID | Number of Neighbors | Percent Edges in social group'
     for i in inGroup:
         nn = len(matrix[i].keys())
-        print i, nn, inGroup[i]
+        print i,'|', nn,'|', inGroup[i]
     #plt.show()
 
 def main():
