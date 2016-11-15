@@ -3,16 +3,18 @@ Independent Project for Bio331
 
 
 ## Data
-The data is an updated version of the data used in Weber et. al. (2014). This data was requested by Anna Ritz in the early fall of 2016.The data is held in two files BadgerInfo.txt and BadgerMatrix.txt.
+The data is an updated version of the data used in Weber et. al. (2013). This data was requested by Anna Ritz in the early fall of 2016.The data is held in two files BadgerInfo.txt and BadgerMatrix.txt.
 
 * __BadgerInfo.txt__.  This contains demographic information about the badgers in in the study.  It contains four columns: badger name, sex,whether or not they are infected with tuberculosis, and the social group the badger is a part of.
 
 * __BadgerMatrix.txt__.  This contains the interaction data of the badgers.  This matrix is constructed as usual with each cell being the interaction between the row and column badger.  The number in the cell denotes the amount of time (minutes/seconds?) that the two badgers were in close contact
 
 ## Summary Statistics
+This data consists of all of the interactions of 52 badgers.
 
-Badger ID | Number of Neighbors | Percent Edges in social group
---------- | ------------------- | -----------------------------
+
+Badger ID | Number of Neighbors | Proportion of Edges in social group
+--------- | ------------------- | -----------------------------------
 010y | 11 | 0.727272727273
 038r | 6 | 0.666666666667
 038p | 11 | 0.727272727273
@@ -64,3 +66,9 @@ Badger ID | Number of Neighbors | Percent Edges in social group
 103w | 4 | 0.5
 050g | 6 | 0.666666666667
 012b | 11 | 0.727272727273
+
+
+
+
+
+Nicola Weber, Stephen P Carter, Sasha RX Dall, Richard J Delahay, Jennifer L McDonald, Stuart Bearhop, and Robbie A McDonald. Badger social networks correlate with tuberculosis infection. Current Biology, 23(20):R915–R916, 2013.

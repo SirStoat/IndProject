@@ -106,7 +106,7 @@ def getPercentInGroup(info, matrix):
         out[i] = float(inGroup)/len(matrix[i].keys())
     return out
 
-def makeHistogram(inGroup, matrix):
+def makeHistogram(inGroup, matrix, groupSum):
     pIG = []
     for i in inGroup:
         pIG.append(inGroup[i])
@@ -116,11 +116,24 @@ def makeHistogram(inGroup, matrix):
     plt.plot(nn, pIG, 'or')
     plt.xlabel('Number of neighbors')
     plt.ylabel('Percent of neighbors in social group')
-    print 'Badger ID | Number of Neighbors | Percent Edges in social group'
-    for i in inGroup:
-        nn = len(matrix[i].keys())
-        print i,'|', nn,'|', inGroup[i]
-    #plt.show()
+    print 'Group & Proportion of Internal Edges & Number Edges'
+    print '\\hline'
+    for i in groupSum:
+        print i,'&', (groupSum[i]['number']/2),'&', groupSum[i]['Percent']/(groupSum[i]['number']/2), '\\\\'
+        print '\\hline'
+    plt.savefig('writeup/proportionInOut.png')
+
+
+def averageINGroups(info, inGroup, matrix):
+    groups = {}
+    for i in info:
+        group = info[i]['Social Group']
+        if group in groups:
+            groups[group]['Percent'] = groups[group]['Percent'] + inGroup[i]*len(matrix[i].keys())
+            groups[group]['number'] = groups[group]['number'] + len(matrix[i].keys())
+        else:
+            groups[group] = {'Percent':inGroup[i]*len(matrix[i].keys()), 'number':len(matrix[i].keys())}
+    return groups
 
 def main():
     badgers, matrix = readIn()
@@ -135,8 +148,8 @@ def main():
     #graphit('group_5', group5.keys(), getEdgesList(group5))'''
 
     inGroup = getPercentInGroup(badgers, matrix)
-
-    makeHistogram(inGroup, matrix)
+    groupSum = averageINGroups(badgers, inGroup, matrix)
+    makeHistogram(inGroup, matrix, groupSum)
 
 
 
