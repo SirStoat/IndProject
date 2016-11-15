@@ -1,4 +1,7 @@
 import graphspace_utils, json_utils
+import numpy as np
+import matplotlib.mlab as mlab
+import matplotlib.pyplot as plt
 
 
 
@@ -74,13 +77,64 @@ def getEdgesList(dic):
                 edges.append([i,j])
     return edges
 
+def getSubgraph(info, groups, matrix):
+    subgraph = {}
+    badgers = []
+    for i in info:
+        if info[i]['Social Group'] in groups:
+            badgers.append(i)
+    for i in badgers:
+        print i, info[i]['Social Group']
+    for i in matrix:
+        for j in matrix[i]:
+            if i in badgers and j in badgers:
+                if not(i in subgraph):
+                    subgraph[i] = {j:matrix[i][j]}
+                else:
+                    subgraph[i][j] = matrix[i][j]
+    return subgraph
+
+def getPercentInGroup(info, matrix):
+    out = {}
+    for i in matrix:
+        igroup = info[i]['Social Group']
+        inGroup = 0
+        for j in matrix[i]:
+            jgroup = info[j]['Social Group']
+            if igroup == jgroup:
+                inGroup += 1
+        out[i] = float(inGroup)/len(matrix[i].keys())
+    return out
+
+def makeHistogram(inGroup, matrix):
+    pIG = []
+    for i in inGroup:
+        pIG.append(inGroup[i])
+    nn = []
+    for i in inGroup:
+        nn.append(len(matrix[i].keys()))
+    plt.plot(nn, pIG, 'or')
+    plt.xlabel('Number of Neighbors')
+    plt.ylabel('Percent of Neighbors in Social group')
+    plt.show()
+
 def main():
     badgers, matrix = readIn()
+    '''print len(badgers)
     for i in badgers:
         print i, badgers[i]
     print matrix['008p']['012b']
     edges = getEdgesList(matrix)
-    graphit('badgers_Test', badgers.keys(), edges)
+    #graphit('badgers_Test', badgers.keys(), edges)
+
+    #group5 = getSubgraph(badgers, ['5', '4'], matrix)
+    #graphit('group_5', group5.keys(), getEdgesList(group5))'''
+
+    inGroup = getPercentInGroup(badgers, matrix)
+
+    makeHistogram(inGroup, matrix)
+
+
 
 
 

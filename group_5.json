@@ -1,0 +1,171 @@
+{
+    "graph": {
+        "nodes": [
+            {
+                "data": {
+                    "content": "047p", 
+                    "id": "047p"
+                }
+            }, 
+            {
+                "data": {
+                    "content": "049w", 
+                    "id": "049w"
+                }
+            }, 
+            {
+                "data": {
+                    "content": "082w", 
+                    "id": "082w"
+                }
+            }, 
+            {
+                "data": {
+                    "content": "043w", 
+                    "id": "043w"
+                }
+            }, 
+            {
+                "data": {
+                    "content": "062p", 
+                    "id": "062p"
+                }
+            }, 
+            {
+                "data": {
+                    "content": "063p", 
+                    "id": "063p"
+                }
+            }, 
+            {
+                "data": {
+                    "content": "046p", 
+                    "id": "046p"
+                }
+            }, 
+            {
+                "data": {
+                    "content": "008p", 
+                    "id": "008p"
+                }
+            }, 
+            {
+                "data": {
+                    "content": "050g", 
+                    "id": "050g"
+                }
+            }
+        ], 
+        "edges": [
+            {
+                "data": {
+                    "source": "047p", 
+                    "target": "008p"
+                }
+            }, 
+            {
+                "data": {
+                    "source": "047p", 
+                    "target": "046p"
+                }
+            }, 
+            {
+                "data": {
+                    "source": "047p", 
+                    "target": "049w"
+                }
+            }, 
+            {
+                "data": {
+                    "source": "049w", 
+                    "target": "046p"
+                }
+            }, 
+            {
+                "data": {
+                    "source": "049w", 
+                    "target": "008p"
+                }
+            }, 
+            {
+                "data": {
+                    "source": "082w", 
+                    "target": "062p"
+                }
+            }, 
+            {
+                "data": {
+                    "source": "082w", 
+                    "target": "050g"
+                }
+            }, 
+            {
+                "data": {
+                    "source": "082w", 
+                    "target": "043w"
+                }
+            }, 
+            {
+                "data": {
+                    "source": "082w", 
+                    "target": "063p"
+                }
+            }, 
+            {
+                "data": {
+                    "source": "043w", 
+                    "target": "062p"
+                }
+            }, 
+            {
+                "data": {
+                    "source": "043w", 
+                    "target": "050g"
+                }
+            }, 
+            {
+                "data": {
+                    "source": "043w", 
+                    "target": "063p"
+                }
+            }, 
+            {
+                "data": {
+                    "source": "062p", 
+                    "target": "046p"
+                }
+            }, 
+            {
+                "data": {
+                    "source": "062p", 
+                    "target": "050g"
+                }
+            }, 
+            {
+                "data": {
+                    "source": "062p", 
+                    "target": "063p"
+                }
+            }, 
+            {
+                "data": {
+                    "source": "063p", 
+                    "target": "050g"
+                }
+            }, 
+            {
+                "data": {
+                    "source": "046p", 
+                    "target": "008p"
+                }
+            }
+        ]
+    }, 
+    "metadata": {
+        "tags": [
+            ""
+        ], 
+        "description": "Desc.", 
+        "title": "group_5"
+    }
+}
