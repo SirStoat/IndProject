@@ -50,7 +50,7 @@
 %%%%%%%%%%%% DEFINE PACKAGES HERE!!
 \usepackage{algorithmic}
 \usepackage{algorithm}
-\usepackage{minted}
+%\usepackage{minted}
 
 \begin{document}
 
@@ -141,135 +141,64 @@ This ACM-style template describes how to typeset pseudocode as well as write com
 \keywords{pseudocode, algorithms, math, LaTeX}
 
 
-\section{Typesetting Math}
-
-LaTeX makes typesetting math \textit{very} easy.  You can use dollar signs to typeset variables and short mathematical expressions within the paragraph.  For example, supposed we have three variables $x$, $y$, and $z$; we can define a linear equation as $3x+2y-z=10$.  Other examples of math are shown in Table~\ref{math}.  Use curly braces to group multiple characters in subscripts or superscripts.
-
-%In the line below, [h] means "here", [t] means "top of page", [b] means "bottom of page"
-\begin{table}[h]  
-\centering
-\begin{tabular}{r|l}  % r means "right adjust", l means "left adjust", pipe denotes vertical line.
-LaTeX & Math \\ \hline
-\$x\$ & $x$ \\
-\$S\_i\$ & $S_i$ \\
-\$$\backslash$sum\_\{i=1\}\^{}\{20\} S\_i\$ & $\sum_{i=1}^{20} S_i$ \\
-\$$\backslash$max\_x f(x)\$ & $\max_x f(x)$ \\
-\$A $\backslash$cup B\$ & $A \cup B$ \\
-\$$\backslash$bigcup\_i S\_i\$ & $\bigcup_i S_i$ \\
-\$x $\backslash$text\{ for all \} x $\backslash$in X\$ & $x \text{ for all } x \in X$ \\
-\end{tabular}\caption{Common math syntax.} 
-\label{math}
-\end{table}
-
-You can offset equations with double dollar signs, such as 
-$$x=y+z-w.$$
-You can also use multi-line equations that are aligned with the \texttt{align} package:
-\begin{align}
-x &= \prod_{u \in U} |X_u| \\
-x_2 & \geq y_0 + y_1 + \sum_{j=1}^5 z_j \label{line2}
-\end{align}
-Here, the equations will be numbered, and you can refer to them with labels, e.g., Equation~\eqref{line2} is the second equation.
-
 \section{Pseudocode}
-
-There are many algorithms packages in LaTeX; here, I'll describe the \texttt{algorithmic} package, which I've used for this course.  You'll also want to be able to number these algorithms (like Tables or Figures); this can be done with the \texttt{algorithm} package.  At the top of this file (the .tex), you will see two \texttt{\\usepackage} commands that import these packages.
-
-\subsection{The \texttt{algorithmic} Package}
-
-Consider the following snippet of code.
-
-\begin{verbatim}
-\begin{algorithmic}
-\STATE $i=1$
-\WHILE{$i < 10$}
-\STATE $i=i+1$
-\ENDWHILE
-\RETURN i
-\end{algorithmic}
-\end{verbatim}
-
-\noindent This code in LaTeX produces the formatted pseudocode.
-
-\begin{algorithmic}
-\STATE $i=1$
-\WHILE{$i < 10$}
-\STATE $i=i+1$
-\ENDWHILE
-\RETURN i
-\end{algorithmic}
-\vspace{.2in}
-
-\noindent The syntax for different statements is below.  The text may be words or math.
-\begin{itemize}
-\item $\backslash$STATE $<$text$>$
-\item $\backslash$RETURN $<$text$>$
-\item $\backslash$IF\{$<$condition$>$\} $<$text$>$ $\backslash$ENDIF
-\item $\backslash$WHILE\{$<$condition$>$\} $<$text$>$ $\backslash$ENDWHILE
-\item $\backslash$FOR\{$<$condition$>$\} $<$text$>$ $\backslash$ENDFOR
-\item $\backslash$AND, $\backslash$OR, $\backslash$NOT: logical connectives
-\end{itemize}
-
-\subsection{The \texttt{algorithm} Environment}
-
-To add a caption, name, or label to your algorithm, you can use the \texttt{algorithm} environment.  It will move as you modify text to make a decent layout.  The LaTeX below produces the nicely-formatted algorithm, and you can refer to it as Algorithm~\ref{alg-label}.
-
-\begin{verbatim}
-\begin{algorithm}
-\caption{An example algorithm.}
-\label{alg-label}
-\begin{algorithmic}
-\STATE $i=1$
-\WHILE{$i < 10$}
-\STATE $i=i+1$
-\ENDWHILE
-\RETURN i
-\end{algorithmic}
-\end{algorithm}
-\end{verbatim}
+The goal is to find the flow-betweenness centrality of all of the nodes in the graph.  To do this I use alorgithm \ref{FBC} to get the normalized amount of flow calculated though each pair of points.  This algrorithm uses the Fodr-Fulkerson method to caluclate individual flows though nodes.  I seperate the flows into four different sections which use different subsets depending on which social group the node in question and to the sorce and target node are from.  First, $c_{total}$ inlcudes all of the possible pairing of source and sink nodes.  Seccond $c_{btwn}$ consists of sorce and target are not from the same socal group.  The next two are if the source and the target are in the same social group: $c_{inter}$ has the node in question in that same social group, $c_{out}$ has the node in question in a different social group. Algorithm \ref{FBC} interates between all unique combinations of sources and targes with $(u,v) = (v,u)$ and at each combination finds the normalized flow for all the nodes using \ref{FF}.  It then addes those flows to the centrality group that they are a part of.  
 
 \begin{algorithm}
-\caption{An example algorithm.}
-\label{alg-label}
+\caption{Flow-Betweenness Centrality}
+\label{FBC}
 \begin{algorithmic}
-\STATE $i=1$
-\WHILE{$i < 10$}
-\STATE $i=i+1$
-\ENDWHILE
-\RETURN i
+\STATE \textbf{Inputs:} $G(E,V)$ and edge weights $w$ social groups s
+\STATE \textbf{Outputs:} flow-betweenness centrality for nodes
+\STATE $c_{inter}(n) \leftarrow 0 \text{ for } n \in E$
+\STATE $c_{btwn}(n) \leftarrow 0 \text{ for } n \in E$
+\STATE $c_{out}(n) \leftarrow 0 \text{ for } n \in E$
+\FOR {$k \in V$}
+\FOR{$j \in V : (j,k) \in E \text{ and } j < k$}
+\STATE $ f(u,v) = \text{Ford-Fulkerson} (G,w,j,k)$
+\FOR{n $\in V : n \neq j \text{ and } n \neq k$}
+\STATE $c(n) = \sum_{o \in N(n)}\frac{| f(n,o)|}{2 (\sum_{o \in N(k)}|f(k,o)|)} \text{ where } N(n) \text{ are n's neighbors} $
+\IF { $s(j) = s(k) \text{ \textbf{and} } s(j) = s(n)$}
+\STATE $c_{inter} = c_{inter} + c$
+\ELSIF {$s(j) = s(k)$}
+\STATE $c_{out} = c_{out} + c$
+\ELSE 
+\STATE $c_{btwn} = c_{btwn} + c$
+\ENDIF
+\STATE $c_{total} = c_{total} + c$
+\ENDFOR
+\ENDFOR
+\ENDFOR
+\RETURN $c_{total}, c_{inter}, c_{btwn}, c_{out}$
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Typesetting Code}
 
-Suppose you want to write a Python function definition.  You can color-format the code using the \texttt{minted} package:
 
-\begin{verbatim}
-\begin{minted}{python}
-def simple_add(x,y):
-  z = x + y
-  return z
-\end{minted}
-\end{verbatim}
+The Ford-Fulkerson method (Algorithm \ref{FF}) works by simulating putting flow throught the graph.  It does this by keeping track of a residual network ($G_{f}$) which is a representation of how much more flow can go through each of the edges.  The algorithm goes until there is not path from the source to the sink where all of the edges $>$ 0 in the residual graph.  In other words this is untill there can be no more flow to the target from the source.  Each iteration the algorithm find a path using depth first search on $G_{f}$, then it adds the minimun edge$ c_{f}$ value to each of the flows and the recalculates $G_{f}$.  This is like sending the most possible flow though that path which is restricted by edge with the lowest flow.  Once there are no more paths in $G_{f}$ from the source to the target it will return the flows for each of the edges in G.
 
-\noindent The above lines of LaTeX produces:
-\begin{minted}{python}
-def simple_add(x,y):
-  z = x + y
-  return z
-\end{minted}
 
-\section{Pseudocode Writeup}
+\begin{algorithm}[t]
+\caption{Ford-Fulkerson method}
+\label{FF}
+\begin{algorithmic}
+\STATE $\text{ \textbf{Inputs:} A network } G = (V, E) \text{ with flow capasity } c, \text{ source } s, \text{ and target } t$ 
+\STATE $ \text{ \textbf{Outputs:} Flows } f(u, v) \text{ for all }(u, v) \in E \text{ between }s \text{ and }t$
+\STATE $f(u, v) \leftarrow 0 \text{ for all edges } (u, v)$
+\WHILE{  $\text{there exits a path } p_{st} \text{ in } G_{f} : c_{f} (u,v) > 0 \text{ for all edges } (u, v) \in p$}
+\STATE find $c_{f}(p) = \min (c_{f}:(u, v) \in P)$
+\FOR{each edge $(u,v) \in p$}
+\STATE  $f(u, v) \leftarrow f(u,v) + c_{f}(p)$
+\STATE  $f(v, u) \leftarrow f(v,u) - c_{f}(p)$
+\ENDFOR
+\ENDWHILE
+\RETURN $f(u,v)$
+\end{algorithmic}
+\end{algorithm}
 
-Write a description of the code you are writing.  
-\begin{enumerate}
-\item Write pseudocode (a mix of code, math, and concise terms) that describes a major component of your project.
-\item Write a summary of the pseudocode that provides intuition.
-\end{enumerate}
 
-\noindent If you have multiple parts of your project, in addition to the pseudocode you can make an \textbf{overview figure} that shows how the parts are connected.  
 
-\paragraph{Evaluation}  I will assess and provide feedback on the \textbf{notation and syntax} of your pseudocode and the \textbf{clarity} of your summary. I will also provide feedback on an overview figure if it's submitted.
 
-\paragraph{Handin Instructions} Hand in the PDF of your LaTeX document describing the pseudocode by Tuesday at 5pm.
+
 
 \end{document}
