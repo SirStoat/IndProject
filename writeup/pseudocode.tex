@@ -178,7 +178,7 @@ The goal is to find the flow-betweenness centrality of all of the nodes in the g
 The Ford-Fulkerson method (Algorithm \ref{FF}) works by simulating putting flow throught the graph.  It does this by keeping track of a residual network ($G_{f}$) which is a representation of how much more flow can go through each of the edges.  The algorithm goes until there is not path from the source to the sink where all of the edges $>$ 0 in the residual graph.  In other words this is untill there can be no more flow to the target from the source.  Each iteration the algorithm find a path using depth first search on $G_{f}$, then it adds the minimun edge$ c_{f}$ value to each of the flows and the recalculates $G_{f}$.  This is like sending the most possible flow though that path which is restricted by edge with the lowest flow.  Once there are no more paths in $G_{f}$ from the source to the target it will return the flows for each of the edges in G.
 
 
-\begin{algorithm}[t]
+\begin{algorithm}[h!]
 \caption{Ford-Fulkerson method}
 \label{FF}
 \begin{algorithmic}
