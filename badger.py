@@ -76,17 +76,14 @@ def readInTest():
     data = File.read()
     File.close()
 
-    print data
     data = data.split('\n')
     head = data.pop(0)
     head = head.split('\t')
     head.pop(0)
     data.pop()
     dic = {}
-    print head
     for i in range(len(data)):
         row = data[i].split('\t')
-        print row
         tail = row.pop(0)
         dic[head[i]] = {}
         for j in range(len(row)):
@@ -173,8 +170,7 @@ def depthFirstSearch(dic, start, target):
     nodes = getNodes(dic)
     disc = [start]
     path = [start]
-    print path
-    while path[len(path)-1] != target and len(disc) < nodes:
+    while len(path) > 0 and path[len(path)-1] != target :
         current = path[len(path)-1]
         if current in dic:
             neighbors = dic[start]
@@ -189,12 +185,7 @@ def depthFirstSearch(dic, start, target):
             else:
                 path.append(nxt)
                 disc.append(nxt)
-        else:
-            path.pop()
-    if path[len(path)-1] != target:
-        return None
-    else:
-        return path
+    return path
 
 def getResidual(graph, flow):
     res = {}
@@ -210,23 +201,77 @@ def fordFulkerson(graph, source, target):
     for i in graph:
         flow[i] = {}
         for j in graph[i]:
-            flow[i][j] = graph[i][j]
+            flow[i][j] = 0
     res = getResidual(graph , flow)
-    path = depthFirstSearch(graph, source, target)
-    while path != None:
+    path = depthFirstSearch(res, source, target)
+    count = 0
+    while len(path) > 0:
+        score = 100
+        for i in range(len(path)-1):
+            current = path[i]
+            nxt = path[i+1]
+            if res[current][nxt] < score:
+                score = res[current][nxt]
+        print score
+        for i in range(len(path)-1):
+            current = path[i]
+            nxt = path[i+1]
+            flow[current][nxt] = flow[current][nxt] + score
+            flow[nxt][current] = flow[nxt][current] - score
+        res = getResidual(graph, flow)
+        path = depthFirstSearch(res, source, target)
+    return flow
+
+def getNodeFlows(flows, nodes, source, target):
+    dic = {}
+    total = 0
+    for i in flows[source]:
+        total += flows[source][i]
+    for i in flows:
+        score = 0
+        for j in flows[i]:
+            score += abs(flow[i][j])
+        if i != source and i != target:
+            score = float(score)/(2*total)
+        dic[i] = score
+    return dic
+
+def flowBetweenness(graph, social):
+    nodes = getNodes(graph)
+    scores = {}
+    for i in nodes:
+        scores[i] = {'inter':0, 'between':0, 'out':0}
+    for i in range(len(nodes)):
+        source = nodes[i]
+        for j in range(i, len(nodes)):
+            target = nodes[j]
+            flows = fordFulkerson(graph, source, target)
+            nodeFlows = getNodeFlows(flows, nodes, source, target)
+            for k in nodeFlows:
+                s_k = social[k]
+                s_i = social[i]
+                s_j = social[j]
+                if s_k == s_j and s_j == s_i:
+                    key = 'inter'
+                elif s_j == s_i:
+                    key = 'out'
+                else:
+                    key = 'between'
+                scores[k][key] = scores[k][key] + nodeFlows[k]
+
+
 
 
 def main():
     #badgers, matrix = readIn()
     test = readInTest()
-    print 'Start Test'
-    for i in test:
-        print i, test[i]
 
-    print
     path = depthFirstSearch(test, 'a', 'd')
-    print path
 
+    flow = fordFulkerson(test, 'a', 'd')
+    print 'Final'
+    for i in flow:
+        print i, flow[i]
     #graphit('test', test)
     '''inGroup = getPercentInGroup(badgers, matrix)
     groupSum = averageINGroups(badgers, inGroup, matrix)
