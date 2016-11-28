@@ -26,7 +26,9 @@ def getNodeAttributes(nodes):
         attrs[n]['id'] = n ## set the id (REQUIRED)
     return attrs
 
-def graphit(name, nodes, edges):
+def graphit(name, dic):
+    nodes = getNodes(dic)
+    edges = getEdgesList(dic)
     #nodeFile = getNodeAttributes(nodes)
     nodeFile = None
     #edgeFile = getEdgeAttributes(edges)
@@ -70,24 +72,28 @@ def readIn():
     return badgerDemo, network
 
 def readInTest():
-	File = open('test.txt', 'r')
-	data = File.read()
-	File.close()
+    File = open('test.txt', 'r')
+    data = File.read()
+    File.close()
 
-	data = data.split('\n')
-	head = data.pop(0)
-	head = head.split('\t')
-	head.pop(0)
-	dic = {}
-	for i in range(len(data)):
-		row = data[i].split('\t')
-		tail = row.pop(0)
-        print i, len(head)
-		dic[head[i]] = {}
-		for j in range(len(row)):
-			dic[head[i]][j] = row[j]
-	return dic
-
+    print data
+    data = data.split('\n')
+    head = data.pop(0)
+    head = head.split('\t')
+    head.pop(0)
+    data.pop()
+    dic = {}
+    print head
+    for i in range(len(data)):
+        row = data[i].split('\t')
+        print row
+        tail = row.pop(0)
+        dic[head[i]] = {}
+        for j in range(len(row)):
+            num = int(row[j])
+            if num > 0:
+                dic[head[i]][head[j]] = num
+    return dic
 
 def getEdgesList(dic):
     edges = []
@@ -97,6 +103,15 @@ def getEdgesList(dic):
                 edges.append([i,j])
     return edges
 
+def getNodes(dic):
+    nodes = []
+    for i in dic:
+        if not(i in nodes):
+            nodes.append(i)
+        for j in dic[i]:
+            if not(j in nodes):
+                nodes.append(j)
+    return nodes
 def getSubgraph(info, groups, matrix):
     subgraph = {}
     badgers = []
@@ -154,6 +169,41 @@ def averageINGroups(info, inGroup, matrix):
             groups[group] = {'Percent':inGroup[i]*len(matrix[i].keys()), 'number':len(matrix[i].keys())}
     return groups
 
+def depthFirstSearch(dic, start, target):
+    nodes = getNodes(dic)
+    disc = [start]
+    path = [start]
+    print path
+    while path[len(path)-1] != target and len(disc) < nodes:
+        current = path[len(path)-1]
+        if current in dic:
+            neighbors = dic[start]
+            nxt = None
+            score = 0
+            for i in dic[current]:
+                if not(i in disc) and dic[current][i] > score:
+                    score = dic[current][i]
+                    nxt = i
+            if nxt == None:
+                path.pop()
+            else:
+                path.append(nxt)
+                disc.append(nxt)
+        else:
+            path.pop()
+    if path[len(path)-1] != target:
+        return None
+    else:
+        return path
+
+def getResidual(graph, flow):
+    res = {}
+    for i in graph:
+        res[i] = {}
+        for j in graph[i]:
+            res[i][j] = graph[i][j] - flow[i][j]
+    return res
+
 def fordFulkerson(graph, source, target):
     flow = {}
     #initiate flow graph
@@ -161,14 +211,23 @@ def fordFulkerson(graph, source, target):
         flow[i] = {}
         for j in graph[i]:
             flow[i][j] = graph[i][j]
-    #
+    res = getResidual(graph , flow)
+    path = depthFirstSearch(graph, source, target)
+    while path != None:
+
 
 def main():
     #badgers, matrix = readIn()
     test = readInTest()
+    print 'Start Test'
     for i in test:
         print i, test[i]
 
+    print
+    path = depthFirstSearch(test, 'a', 'd')
+    print path
+
+    #graphit('test', test)
     '''inGroup = getPercentInGroup(badgers, matrix)
     groupSum = averageINGroups(badgers, inGroup, matrix)
     makeHistogram(inGroup, matrix, groupSum)

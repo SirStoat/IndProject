@@ -1,0 +1,69 @@
+{
+    "graph": {
+        "nodes": [
+            {
+                "data": {
+                    "content": "a", 
+                    "id": "a"
+                }
+            }, 
+            {
+                "data": {
+                    "content": "c", 
+                    "id": "c"
+                }
+            }, 
+            {
+                "data": {
+                    "content": "b", 
+                    "id": "b"
+                }
+            }, 
+            {
+                "data": {
+                    "content": "d", 
+                    "id": "d"
+                }
+            }
+        ], 
+        "edges": [
+            {
+                "data": {
+                    "source": "a", 
+                    "target": "c"
+                }
+            }, 
+            {
+                "data": {
+                    "source": "a", 
+                    "target": "b"
+                }
+            }, 
+            {
+                "data": {
+                    "source": "c", 
+                    "target": "b"
+                }
+            }, 
+            {
+                "data": {
+                    "source": "c", 
+                    "target": "d"
+                }
+            }, 
+            {
+                "data": {
+                    "source": "b", 
+                    "target": "d"
+                }
+            }
+        ]
+    }, 
+    "metadata": {
+        "tags": [
+            ""
+        ], 
+        "description": "Desc.", 
+        "title": "test"
+    }
+}
