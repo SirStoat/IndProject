@@ -69,6 +69,26 @@ def readIn():
                 network[badger][badgers[j]] = row[j]
     return badgerDemo, network
 
+def readInTest():
+	File = open('test.txt', 'r')
+	data = File.read()
+	File.close()
+
+	data = data.split('\n')
+	head = data.pop(0)
+	head = head.split('\t')
+	head.pop(0)
+	dic = {}
+	for i in range(len(data)):
+		row = data[i].split('\t')
+		tail = row.pop(0)
+        print i, len(head)
+		dic[head[i]] = {}
+		for j in range(len(row)):
+			dic[head[i]][j] = row[j]
+	return dic
+
+
 def getEdgesList(dic):
     edges = []
     for i in dic:
@@ -123,7 +143,6 @@ def makeHistogram(inGroup, matrix, groupSum):
         print '\\hline'
     plt.savefig('writeup/proportionInOut.png')
 
-
 def averageINGroups(info, inGroup, matrix):
     groups = {}
     for i in info:
@@ -135,22 +154,25 @@ def averageINGroups(info, inGroup, matrix):
             groups[group] = {'Percent':inGroup[i]*len(matrix[i].keys()), 'number':len(matrix[i].keys())}
     return groups
 
+def fordFulkerson(graph, source, target):
+    flow = {}
+    #initiate flow graph
+    for i in graph:
+        flow[i] = {}
+        for j in graph[i]:
+            flow[i][j] = graph[i][j]
+    #
+
 def main():
-    badgers, matrix = readIn()
-    '''print len(badgers)
-    for i in badgers:
-        print i, badgers[i]
-    print matrix['008p']['012b']
-    edges = getEdgesList(matrix)
-    #graphit('badgers_Test', badgers.keys(), edges)
+    #badgers, matrix = readIn()
+    test = readInTest()
+    for i in test:
+        print i, test[i]
 
-    #group5 = getSubgraph(badgers, ['5', '4'], matrix)
-    #graphit('group_5', group5.keys(), getEdgesList(group5))'''
-
-    inGroup = getPercentInGroup(badgers, matrix)
+    '''inGroup = getPercentInGroup(badgers, matrix)
     groupSum = averageINGroups(badgers, inGroup, matrix)
     makeHistogram(inGroup, matrix, groupSum)
-
+    '''
 
 
 
