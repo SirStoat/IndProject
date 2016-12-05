@@ -109,6 +109,7 @@ def getNodes(dic):
             if not(j in nodes):
                 nodes.append(j)
     return nodes
+
 def getSubgraph(info, groups, matrix):
     subgraph = {}
     badgers = []
@@ -258,20 +259,31 @@ def flowBetweenness(graph, social):
                 else:
                     key = 'between'
                 scores[k][key] = scores[k][key] + nodeFlows[k]
+    return scores
 
-
-
+def readSTest():
+    File = open('testS.txt')
+    data = File.read()
+    File.close()
+    data = data.split('\n')
+    data.pop()
+    dic = {}
+    for i in data:
+        row = i.split('\t')
+        dic[row[0]] = row[1]
+    return dic
 
 def main():
     #badgers, matrix = readIn()
     test = readInTest()
 
     path = depthFirstSearch(test, 'a', 'd')
-
+    social = readSTest()
     flow = fordFulkerson(test, 'a', 'd')
     print 'Final'
     for i in flow:
         print i, flow[i]
+    #scores = flowBetweenness(flow, social)
     #graphit('test', test)
     '''inGroup = getPercentInGroup(badgers, matrix)
     groupSum = averageINGroups(badgers, inGroup, matrix)
