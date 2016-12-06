@@ -2,13 +2,13 @@ import graphspace_utils, json_utils
 import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
+import sys
 
 
 
 def getEdgeAttributes(edges):
     attrs = {} ## dictionary to return
     #weights = normalize(weights)
-    print weights
     for i in range(len(edges)):
         e = edges[i]
         source = e[0] ## set source node
@@ -116,8 +116,6 @@ def getSubgraph(info, groups, matrix):
     for i in info:
         if info[i]['Social Group'] in groups:
             badgers.append(i)
-    for i in badgers:
-        print i, info[i]['Social Group']
     for i in matrix:
         for j in matrix[i]:
             if i in badgers and j in badgers:
@@ -213,7 +211,6 @@ def fordFulkerson(graph, source, target):
             nxt = path[i+1]
             if res[current][nxt] < score:
                 score = res[current][nxt]
-        print score
         for i in range(len(path)-1):
             current = path[i]
             nxt = path[i+1]
@@ -231,7 +228,7 @@ def getNodeFlows(flows, nodes, source, target):
     for i in flows:
         score = 0
         for j in flows[i]:
-            score += abs(flow[i][j])
+            score += abs(flows[i][j])
         if i != source and i != target:
             score = float(score)/(2*total)
         dic[i] = score
@@ -244,21 +241,28 @@ def flowBetweenness(graph, social):
         scores[i] = {'inter':0, 'between':0, 'out':0}
     for i in range(len(nodes)):
         source = nodes[i]
-        for j in range(i, len(nodes)):
+        for j in range(i+1, len(nodes)):
             target = nodes[j]
             flows = fordFulkerson(graph, source, target)
+            #print source, target
+            #print
             nodeFlows = getNodeFlows(flows, nodes, source, target)
-            for k in nodeFlows:
-                s_k = social[k]
-                s_i = social[i]
-                s_j = social[j]
-                if s_k == s_j and s_j == s_i:
-                    key = 'inter'
-                elif s_j == s_i:
-                    key = 'out'
-                else:
-                    key = 'between'
-                scores[k][key] = scores[k][key] + nodeFlows[k]
+            for k in nodeFlows.keys():
+                if k != nodes[i] and k != nodes[j]:
+                    s_k = social[k]
+                    s_i = social[nodes[i]]
+                    s_j = social[nodes[j]]
+                    print k, nodes[j], nodes[i]
+                    print s_k, s_j, s_i
+                    if s_k == s_j and s_j == s_i:
+                        key = 'inter'
+                    elif s_j == s_i:
+                        key = 'out'
+                    else:
+                        key = 'between'
+                    print key
+                    print nodeFlows[k]
+                    scores[k][key] = scores[k][key] + nodeFlows[k]
     return scores
 
 def readSTest():
@@ -273,6 +277,37 @@ def readSTest():
         dic[row[0]] = row[1]
     return dic
 
+def dist(graph, start, target):
+    Q = [start]
+    dist = {Q[0]:0}
+    path = {start:[]}
+    while len(Q) > 0:
+        node = Q.pop(0)
+        neighbors = graph[node].keys()
+        for i in neighbors:
+            if not(i in dist) or dist[i] > dist[node] + graph[node][i]:
+                dist[i] = dist[node] + graph[node][i]
+                Q = addtoQ(Q, i, dist)
+                path[i] = path[node] + [[i,node]]
+    return path[target]
+
+def betweeness(paths, edges):
+    dic = {}
+    for i in edges:
+        
+
+def GNmethod(graph):
+    paths = {}
+    tree = {}
+    keys = graph.keys()
+    edges = getEdgesList(graph)
+    for i in range(len(keys):
+        paths[keys[i]] = {}
+        for j in range(i+1, len(keys)):
+            paths[keys[i]][keys[j]] = dist(graph, keys[i], keys[j])
+
+
+
 def main():
     #badgers, matrix = readIn()
     test = readInTest()
@@ -283,8 +318,10 @@ def main():
     print 'Final'
     for i in flow:
         print i, flow[i]
-    #scores = flowBetweenness(flow, social)
-    #graphit('test', test)
+    scores = flowBetweenness(test, social)
+    for i in scores:
+        for j in scores[i]:
+            print i, j, scores[i][j]
     '''inGroup = getPercentInGroup(badgers, matrix)
     groupSum = averageINGroups(badgers, inGroup, matrix)
     makeHistogram(inGroup, matrix, groupSum)
