@@ -92,12 +92,15 @@ def readInTest():
                 dic[head[i]][head[j]] = num
     return dic
 
-def getEdgesList(dic):
-    edges = []
-    for i in dic:
-        for j in dic[i]:
-            if not([i,j] in edges) and not([j,i] in edges):
-                edges.append([i,j])
+def getEdgesList(dic, isSet=False):
+        edges = []
+        for i in dic:
+            for j in dic[i]:
+                if not([i,j] in edges) and not([j,i] in edges):
+                    if isSet == False:
+                        edges.append([i,j])
+                    elif isSet == True:
+                        edges.append((i,j))
     return edges
 
 def getNodes(dic):
@@ -277,10 +280,23 @@ def readSTest():
         dic[row[0]] = row[1]
     return dic
 
+def addPaths(path, old, new, action):
+    if action == 'replace':
+        oldPath = path[old]
+        for i in range(len(oldPath)):
+            oldPath.append((old, new))
+        path[new] = oldPath
+    elif action == 'add':
+        oldPath = path[old]
+        for i in range(len(oldPath)):
+            oldPath[i].append((old,new))
+            path[new].append(oldPath[i])
+    return
+
 def dist(graph, start, target):
     Q = [start]
     dist = {Q[0]:0}
-    path = {start:[]}
+    path = {start:[[]]}
     while len(Q) > 0:
         node = Q.pop(0)
         neighbors = graph[node].keys()
@@ -288,24 +304,60 @@ def dist(graph, start, target):
             if not(i in dist) or dist[i] > dist[node] + graph[node][i]:
                 dist[i] = dist[node] + graph[node][i]
                 Q = addtoQ(Q, i, dist)
-                path[i] = path[node] + [[i,node]]
+                addpaths(path, node, i, 'replace')
+            elif dist[i] == dist[node] + graph[node][i]:
+                addpaths(path, node, i, 'add')
     return path[target]
+
+def sumAllMatrix(dic):
+    edges = {}
+    for i in dic:
+        sm = 0
+        for j in dic[i]:
+            for k in dic[i][j]:
+                sm += k
+        edges[i] = sm
+    return edges
 
 def betweeness(paths, edges):
     dic = {}
     for i in edges:
-        
+        matrix = {}
+        for j in paths:
+            matrix[j] = {}
+            for k in paths[j]:
+                count = 0
+                for l in paths[j][k]:
+                    if i in l:
+                        count += 1
+                matrix[i][j] = float(count)/len(paths[j][k].key())
+        dic[i] = matrix
+    return dic
+
+def updateBetweeness(path, matrixes, edge):
+    for i in path:
+        for j in path[i]:
+
 
 def GNmethod(graph):
     paths = {}
     tree = {}
     keys = graph.keys()
-    edges = getEdgesList(graph)
-    for i in range(len(keys):
+    edges = getEdgesList(graph, True)
+    for i in range(len(keys)):
         paths[keys[i]] = {}
         for j in range(i+1, len(keys)):
             paths[keys[i]][keys[j]] = dist(graph, keys[i], keys[j])
-
+    matrixes = betweeness(paths, edges)
+    while len(edges) > 0:
+        betweeness = sumAllMatrix(dic)
+        score = 0
+        edge = None
+        for i in betweeness:
+            if betweeness[i] > score:
+                edge = i
+        edges.remove(edge)
+        updateBetweeness(paths, matrixes, edge)
 
 
 def main():
