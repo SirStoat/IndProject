@@ -96,11 +96,12 @@ def getEdgesList(dic, isSet=False):
     edges = []
     for i in dic:
         for j in dic[i]:
-            if not([i,j] in edges) and not([j,i] in edges):
-                if isSet == False:
+            if isSet == False:
+                if not([i,j] in edges) and not([j,i] in edges):
                     edges.append([i,j])
-                elif isSet == True:
-                    edges.append({i,j})
+            elif isSet == True:
+                if not(frozenset([i,j]) in edges):
+                    edges.append(frozenset([i,j]))
     return edges
 
 def getNodes(dic):
@@ -283,14 +284,16 @@ def readSTest():
 def addPaths(path, old, new, action):
     if action == 'replace':
         oldPath = path[old]
+        newPath = [[] for i in range(len(oldPath))]
         for i in range(len(oldPath)):
-            oldPath[i].append({old,new})
-        path[new] = oldPath
+            newPath[i] = oldPath[i] + [frozenset([old, new])]
+        path[new] = newPath
     elif action == 'add':
         oldPath = path[old]
+        newPath = [[] for i in range(len(oldPath))]
         for i in range(len(oldPath)):
-            oldPath[i].append({old,new})
-            path[new].append(oldPath[i])
+            newPath[i] = oldPath[i] + [frozenset([old, new])]
+        path[new] = path[new] + newPath
 
 def addtoQ(Q, thing, dist):
     i = 0
@@ -313,18 +316,12 @@ def dist(graph, start, target):
         node = Q.pop(0)
         neighbors = graph[node].keys()
         for i in neighbors:
-            '''if i in dist:
-                print dist[i], dist[node] + graph[node][i]
-            else:
-                print i, node'''
             if not(i in dist) or dist[i] > dist[node] + graph[node][i]:
                 dist[i] = dist[node] + graph[node][i]
                 Q = addtoQ(Q, i, dist)
                 addPaths(path, node, i, 'replace')
-                #print 'in first'
             elif not(i in dist) or dist[i] == dist[node] + graph[node][i]:
                 addPaths(path, node, i, 'add')
-                #print 'in seccond'
     return path[target]
 
 def sumAllMatrix(dic):
@@ -337,7 +334,7 @@ def sumAllMatrix(dic):
         edges[i] = sm
     return edges
 
-def betweeness(paths, edges):
+def Betweeness(paths, edges):
     dic = {}
     for i in edges:
         matrix = {}
@@ -348,7 +345,7 @@ def betweeness(paths, edges):
                 for l in paths[j][k]:
                     if i in l:
                         count += 1
-                matrix[i][j] = float(count)/len(paths[j][k])
+                matrix[j][k] = float(count)/len(paths[j][k])
         dic[i] = matrix
     return dic
 
@@ -382,10 +379,11 @@ def GNmethod(graph):
             print keys[i], keys[j]
             for test in paths[keys[i]][keys[j]]:
                 print test
-            break
-        break
-    return
-    matrixes = betweeness(paths, edges)
+    print 'Done with Paths'
+    print
+    sys.stdout.flush()
+    matrixes = Betweeness(paths, edges)
+    return  #I am here in my debugging, only one more left to do (Nice!)
     while len(edges) > 0:
         betweeness = sumAllMatrix(dic)
         score = 0
