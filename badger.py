@@ -93,14 +93,14 @@ def readInTest():
     return dic
 
 def getEdgesList(dic, isSet=False):
-        edges = []
-        for i in dic:
-            for j in dic[i]:
-                if not([i,j] in edges) and not([j,i] in edges):
-                    if isSet == False:
-                        edges.append([i,j])
-                    elif isSet == True:
-                        edges.append((i,j))
+    edges = []
+    for i in dic:
+        for j in dic[i]:
+            if not([i,j] in edges) and not([j,i] in edges):
+                if isSet == False:
+                    edges.append([i,j])
+                elif isSet == True:
+                    edges.append({i,j})
     return edges
 
 def getNodes(dic):
@@ -284,14 +284,26 @@ def addPaths(path, old, new, action):
     if action == 'replace':
         oldPath = path[old]
         for i in range(len(oldPath)):
-            oldPath.append((old, new))
+            oldPath[i].append({old,new})
         path[new] = oldPath
     elif action == 'add':
         oldPath = path[old]
         for i in range(len(oldPath)):
-            oldPath[i].append((old,new))
+            oldPath[i].append({old,new})
             path[new].append(oldPath[i])
-    return
+
+def addtoQ(Q, thing, dist):
+    i = 0
+    added = False
+    while i < len(Q):
+        if dist[Q[i]] > dist[thing]:
+            Q.insert(i, thing)
+            added = True
+            break
+        i += 1
+    if added == False:
+        Q.append(thing)
+    return Q
 
 def dist(graph, start, target):
     Q = [start]
@@ -301,12 +313,18 @@ def dist(graph, start, target):
         node = Q.pop(0)
         neighbors = graph[node].keys()
         for i in neighbors:
+            '''if i in dist:
+                print dist[i], dist[node] + graph[node][i]
+            else:
+                print i, node'''
             if not(i in dist) or dist[i] > dist[node] + graph[node][i]:
                 dist[i] = dist[node] + graph[node][i]
                 Q = addtoQ(Q, i, dist)
-                addpaths(path, node, i, 'replace')
-            elif dist[i] == dist[node] + graph[node][i]:
-                addpaths(path, node, i, 'add')
+                addPaths(path, node, i, 'replace')
+                #print 'in first'
+            elif not(i in dist) or dist[i] == dist[node] + graph[node][i]:
+                addPaths(path, node, i, 'add')
+                #print 'in seccond'
     return path[target]
 
 def sumAllMatrix(dic):
@@ -330,24 +348,43 @@ def betweeness(paths, edges):
                 for l in paths[j][k]:
                     if i in l:
                         count += 1
-                matrix[i][j] = float(count)/len(paths[j][k].key())
+                matrix[i][j] = float(count)/len(paths[j][k])
         dic[i] = matrix
     return dic
 
-def updateBetweeness(path, matrixes, edge):
+def updateBetweeness(path, matrixes, edge, edges, graph):
+    update = []
     for i in path:
         for j in path[i]:
-
+            for k in path[i][j]:
+                if edge in path:
+                    update.append([i,j])
+    for i in update:
+        path[i[0]][i[1]] = dist(graph, i[0], i[1])
+        for j in edges:
+            count = 0
+            for k in path[i[0]][i[1]]:
+                if j in k:
+                    count += 1
+            matrixes[j][i[0]][i[1]] = float(count)/len(path[i[0]][i[1]])
+    return
 
 def GNmethod(graph):
     paths = {}
     tree = {}
     keys = graph.keys()
     edges = getEdgesList(graph, True)
+    orderRemoved = []
     for i in range(len(keys)):
         paths[keys[i]] = {}
         for j in range(i+1, len(keys)):
             paths[keys[i]][keys[j]] = dist(graph, keys[i], keys[j])
+            print keys[i], keys[j]
+            for test in paths[keys[i]][keys[j]]:
+                print test
+            break
+        break
+    return
     matrixes = betweeness(paths, edges)
     while len(edges) > 0:
         betweeness = sumAllMatrix(dic)
@@ -357,7 +394,12 @@ def GNmethod(graph):
             if betweeness[i] > score:
                 edge = i
         edges.remove(edge)
-        updateBetweeness(paths, matrixes, edge)
+        orderRemoved.append(edge)
+        listEdge = list(edge)
+        graph[listEdge[0]].pop(listEdge[1])
+        graph[listEdge[1]].pop(listEdge[0])
+        updateBetweeness(paths, matrixes, edge, edges, graph)
+    return orderRemoved
 
 
 def main():
@@ -367,13 +409,14 @@ def main():
     path = depthFirstSearch(test, 'a', 'd')
     social = readSTest()
     flow = fordFulkerson(test, 'a', 'd')
-    print 'Final'
+    '''print 'Final'
     for i in flow:
         print i, flow[i]
     scores = flowBetweenness(test, social)
     for i in scores:
         for j in scores[i]:
-            print i, j, scores[i][j]
+            print i, j, scores[i][j]'''
+    edgeOrder = GNmethod(test)
     '''inGroup = getPercentInGroup(badgers, matrix)
     groupSum = averageINGroups(badgers, inGroup, matrix)
     makeHistogram(inGroup, matrix, groupSum)
