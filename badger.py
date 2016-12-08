@@ -322,7 +322,10 @@ def dist(graph, start, target):
                 addPaths(path, node, i, 'replace')
             elif not(i in dist) or dist[i] == dist[node] + graph[node][i]:
                 addPaths(path, node, i, 'add')
-    return path[target]
+    if target in path:
+        return path[target]
+    else:
+        return []
 
 def sumAllMatrix(dic):
     edges = {}
@@ -330,7 +333,7 @@ def sumAllMatrix(dic):
         sm = 0
         for j in dic[i]:
             for k in dic[i][j]:
-                sm += k
+                sm += dic[i][j][k]
         edges[i] = sm
     return edges
 
@@ -349,59 +352,64 @@ def Betweeness(paths, edges):
         dic[i] = matrix
     return dic
 
-def updateBetweeness(path, matrixes, edge, edges, graph):
+def updateBetweeness(paths, matrixes, edge, edges, graph):
     update = []
-    for i in path:
-        for j in path[i]:
-            for k in path[i][j]:
-                if edge in path:
+    for i in paths:
+        for j in paths[i]:
+            for k in paths[i][j]:
+                #print edge
+                #print k
+                if edge in k:
                     update.append([i,j])
     for i in update:
-        path[i[0]][i[1]] = dist(graph, i[0], i[1])
+        temp = dist(graph, i[0], i[1])
+        paths[i[0]][i[1]] = temp
         for j in edges:
             count = 0
-            for k in path[i[0]][i[1]]:
+            for k in paths[i[0]][i[1]]:
                 if j in k:
                     count += 1
-            matrixes[j][i[0]][i[1]] = float(count)/len(path[i[0]][i[1]])
+            if len(paths[i[0]][i[1]]) != 0:
+                matrixes[j][i[0]][i[1]] = float(count)/len(paths[i[0]][i[1]])
+            else:
+                matrixes[j][i[0]][i[1]] = 0
     return
 
 def GNmethod(graph):
     paths = {}
     tree = {}
     keys = graph.keys()
+    dic = {}
+    for i in graph:
+        dic[i] = {}
+        for j in graph[i]:
+            dic[i][j] = graph[i][j]
     edges = getEdgesList(graph, True)
     orderRemoved = []
     for i in range(len(keys)):
         paths[keys[i]] = {}
         for j in range(i+1, len(keys)):
             paths[keys[i]][keys[j]] = dist(graph, keys[i], keys[j])
-            print keys[i], keys[j]
-            for test in paths[keys[i]][keys[j]]:
-                print test
-    print 'Done with Paths'
-    print
-    sys.stdout.flush()
     matrixes = Betweeness(paths, edges)
-    return  #I am here in my debugging, only one more left to do (Nice!)
     while len(edges) > 0:
-        betweeness = sumAllMatrix(dic)
+        betweeness = sumAllMatrix(matrixes)
         score = 0
         edge = None
         for i in betweeness:
             if betweeness[i] > score:
                 edge = i
+                score = betweeness[i]
         edges.remove(edge)
         orderRemoved.append(edge)
         listEdge = list(edge)
         graph[listEdge[0]].pop(listEdge[1])
         graph[listEdge[1]].pop(listEdge[0])
+        matrixes.pop(edge)
         updateBetweeness(paths, matrixes, edge, edges, graph)
     return orderRemoved
 
-
 def main():
-    #badgers, matrix = readIn()
+    badgers, matrix = readIn()
     test = readInTest()
 
     path = depthFirstSearch(test, 'a', 'd')
@@ -414,7 +422,8 @@ def main():
     for i in scores:
         for j in scores[i]:
             print i, j, scores[i][j]'''
-    edgeOrder = GNmethod(test)
+    edgeOrder = GNmethod(matrix)
+    print edgeOrder
     '''inGroup = getPercentInGroup(badgers, matrix)
     groupSum = averageINGroups(badgers, inGroup, matrix)
     makeHistogram(inGroup, matrix, groupSum)
