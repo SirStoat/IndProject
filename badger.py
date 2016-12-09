@@ -238,9 +238,20 @@ def getNodeFlows(flows, nodes, source, target):
         dic[i] = score
     return dic
 
-def flowBetweenness(graph, social):
+def getedgeFlows(flows):
+    for i in flows:
+        for j in flows[i]:
+            flows[i][j] = abs(flows[i][j])
+    return flows
+
+def flowBetweenness(graph, social, placement = 'node'):
     nodes = getNodes(graph)
     scores = {}
+    edgeFlows = {}
+    for i in graph:
+        edgeFlows[i] = {}
+        for j in graph[i]:
+            edgeFlows[i][j] = 0
     for i in nodes:
         scores[i] = {'inter':0, 'between':0, 'out':0}
     for i in range(len(nodes)):
@@ -248,26 +259,33 @@ def flowBetweenness(graph, social):
         for j in range(i+1, len(nodes)):
             target = nodes[j]
             flows = fordFulkerson(graph, source, target)
-            #print source, target
-            #print
-            nodeFlows = getNodeFlows(flows, nodes, source, target)
-            for k in nodeFlows.keys():
-                if k != nodes[i] and k != nodes[j]:
-                    s_k = social[k]
-                    s_i = social[nodes[i]]
-                    s_j = social[nodes[j]]
-                    print k, nodes[j], nodes[i]
-                    print s_k, s_j, s_i
-                    if s_k == s_j and s_j == s_i:
-                        key = 'inter'
-                    elif s_j == s_i:
-                        key = 'out'
-                    else:
-                        key = 'between'
-                    print key
-                    print nodeFlows[k]
-                    scores[k][key] = scores[k][key] + nodeFlows[k]
-    return scores
+            if placement == 'node':
+                nodeFlows = getNodeFlows(flows, nodes, source, target)
+                for k in nodeFlows.keys():
+                    if k != nodes[i] and k != nodes[j]:
+                        s_k = social[k]
+                        s_i = social[nodes[i]]
+                        s_j = social[nodes[j]]
+                        print k, nodes[j], nodes[i]
+                        print s_k, s_j, s_i
+                        if s_k == s_j and s_j == s_i:
+                            key = 'inter'
+                        elif s_j == s_i:
+                            key = 'out'
+                        else:
+                            key = 'between'
+                        print key
+                        print nodeFlows[k]
+                        scores[k][key] = scores[k][key] + nodeFlows[k]
+            elif placement == 'edge':
+                getedgeFlows(flows)
+                for i in flows:
+                    for j in flows[i]:
+                        edgeFlows[i][j] = edgeFlows[i][j] + flows[i][j]
+    if placement == 'node':
+        return scores
+    elif placement == 'edge':
+        return edgeFlows
 
 def readSTest():
     File = open('testS.txt')
@@ -384,6 +402,7 @@ def GNmethod(graph):
         dic[i] = {}
         for j in graph[i]:
             dic[i][j] = graph[i][j]
+    graph = dic
     edges = getEdgesList(graph, True)
     orderRemoved = []
     for i in range(len(keys)):
@@ -408,6 +427,52 @@ def GNmethod(graph):
         updateBetweeness(paths, matrixes, edge, edges, graph)
     return orderRemoved
 
+def getCC(graph, start):
+    Q = [start]
+    cc = [start]
+    while len(Q) > 0:
+        sys.stdout.flush()
+        node = Q.pop(0)
+        neighbors = graph[node].keys()
+        for i in neighbors:
+            if not(i in cc):
+                cc.append(i)
+                Q.append(i)
+    return cc
+
+def getAllCCs(graph):
+    nodes = getNodes(graph)
+    allCCs = []
+    while len(nodes) > 0:
+        ccc = getCC(graph, nodes[0])
+        allCCs.append(ccc)
+        for i in ccc:
+            nodes.remove(i)
+    return allCCs
+
+def GNGroups(edges, graph, number):
+    edges = edges[:]
+    groups = []
+    dic = {}
+    for i in graph:
+        dic[i] = {}
+        for j in graph[i]:
+            dic[i][j] = graph[i][j]
+    graph = dic
+    while len(groups) < number and len(edges) > 0:
+        print len(groups), len(edges)
+        sys.stdout.flush()
+        edge = edges.pop(0)
+        print edge
+        outKey = graph.keys()
+        for i in outKey:
+            inKey = graph[i].keys()
+            for j in inKey:
+                if edge == frozenset([i,j]):
+                    graph[i].pop(j)
+        groups = getAllCCs(graph)
+    return groups
+
 def main():
     badgers, matrix = readIn()
     test = readInTest()
@@ -415,15 +480,20 @@ def main():
     path = depthFirstSearch(test, 'a', 'd')
     social = readSTest()
     flow = fordFulkerson(test, 'a', 'd')
-    '''print 'Final'
+    print 'Final'
     for i in flow:
         print i, flow[i]
-    scores = flowBetweenness(test, social)
+    scores = flowBetweenness(test, social, 'edge')
     for i in scores:
         for j in scores[i]:
-            print i, j, scores[i][j]'''
-    edgeOrder = GNmethod(matrix)
-    print edgeOrder
+            print i, j, scores[i][j]
+    '''edgeOrder = GNmethod(test)
+    print 'done with part 1'
+    sys.stdout.flush()
+    groups = GNGroups(edgeOrder, test, 10)
+    for i in groups:
+        print i
+    print edgeOrder'''
     '''inGroup = getPercentInGroup(badgers, matrix)
     groupSum = averageINGroups(badgers, inGroup, matrix)
     makeHistogram(inGroup, matrix, groupSum)
