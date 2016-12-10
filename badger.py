@@ -4,41 +4,6 @@ import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 import sys
 
-
-
-def getEdgeAttributes(edges):
-    attrs = {} ## dictionary to return
-    #weights = normalize(weights)
-    for i in range(len(edges)):
-        e = edges[i]
-        source = e[0] ## set source node
-        target = e[1] ## set target node
-        if source not in attrs: ## initialize empty dict for source
-            attrs[source] = {} ## (only if not seen yet)
-        attrs[source][target] = {} ## init. (source,target) pair dict
-    return attrs
-
-def getNodeAttributes(nodes):
-    attrs = {} ## dictionary to return
-    for i in range(len(nodes)):
-        n = nodes[i]
-        attrs[n] = {} ## initialize empty dictionary for node n
-        attrs[n]['id'] = n ## set the id (REQUIRED)
-    return attrs
-
-def graphit(name, dic):
-    nodes = getNodes(dic)
-    edges = getEdgesList(dic)
-    #nodeFile = getNodeAttributes(nodes)
-    nodeFile = None
-    #edgeFile = getEdgeAttributes(edges)
-    edgeFile = None
-    data = json_utils.make_json_data(nodes, edges, nodeFile, edgeFile, name, 'Desc.', [''])
-    jsonName = name + '.json'
-    json_utils.write_json(data, jsonName)
-    graphspace_utils.postGraph(name, jsonName, 'menzelk@reed.edu', 'sirstoat')
-    #graphspace_utils.shareGraph(name,'menzelk@reed.edu','sirstoat','Lab7','aritz@reed.edu')
-
 def readIn():
     File = open('BadgerMatrix.txt')
     matrix = File.read()
@@ -256,7 +221,10 @@ def flowBetweenness(graph, social, placement = 'node'):
         scores[i] = {'inter':0, 'between':0, 'out':0}
     for i in range(len(nodes)):
         source = nodes[i]
+        sys.stdout.flush()
         for j in range(i+1, len(nodes)):
+            print 'Finding Flow for nodes:', nodes[i], nodes[j]
+            sys.stdout.flush()
             target = nodes[j]
             flows = fordFulkerson(graph, source, target)
             if placement == 'node':
@@ -266,22 +234,23 @@ def flowBetweenness(graph, social, placement = 'node'):
                         s_k = social[k]
                         s_i = social[nodes[i]]
                         s_j = social[nodes[j]]
-                        print k, nodes[j], nodes[i]
-                        print s_k, s_j, s_i
                         if s_k == s_j and s_j == s_i:
                             key = 'inter'
                         elif s_j == s_i:
                             key = 'out'
                         else:
                             key = 'between'
-                        print key
-                        print nodeFlows[k]
                         scores[k][key] = scores[k][key] + nodeFlows[k]
             elif placement == 'edge':
                 getedgeFlows(flows)
-                for i in flows:
-                    for j in flows[i]:
-                        edgeFlows[i][j] = edgeFlows[i][j] + flows[i][j]
+                neighbors = flows[nodes[i]]
+                totFlow = 0
+                for n in neighbors:
+                    totFlow += flows[nodes[i]][n]
+                totFlow = float(totFlow)
+                for k in flows:
+                    for l in flows[k]:
+                        edgeFlows[k][l] = edgeFlows[k][l] + flows[k][l]/totFlow
     if placement == 'node':
         return scores
     elif placement == 'edge':
@@ -473,8 +442,135 @@ def GNGroups(edges, graph, number):
         groups = getAllCCs(graph)
     return groups
 
+def writeEdgeFlows():
+    badger, matrix = readIn()
+    #matrix = readInTest()
+    #badger = readSTest()
+    print 'read in matrix'
+    sys.stdout.flush()
+    scores = flowBetweenness(matrix, badger, 'edge')
+    print 'got flow scores'
+    sys.stdout.flush()
+    File = open('edgeFlow.txt', 'w')
+    for i in scores:
+        for j in scores[i]:
+            File.write(i + "\t" + j + '\t' + str(scores[i][j]))
+            File.write('\n')
+    File.close()
+    return
+
+def writeNGresults():
+    badger, matrix = readIn()
+    #matrix = readInTest()
+    #badger = readSTest()
+    flows = readInEdgeFlows()
+    raw = GNmethod(matrix)
+    File = open('GN-raw-list.txt', 'w')
+    for i in raw:
+        edge = list(i)
+        File.write(edge[0] + '\t' + edge[1] + '\n')
+    File.close()
+    flowB = GNmethod(flows)
+    File = open('GN-flow-list.txt', 'w')
+    for i in flowB:
+        edge = list(i)
+        File.write(edge[0] + '\t' + edge[1] + '\n')
+    File.close()
+    return
+
+def readInEdgeFlows():
+    File = open('edgeFlow.txt', 'r')
+    data = File.read()
+    File.close()
+    data = data.split('\n')
+    data.pop()
+    dic = {}
+    for i in data:
+        row = i.split('\t')
+        if row[0] in dic:
+            dic[row[0]][row[1]] = float(row[2])
+        else:
+            dic[row[0]] = {row[1]:float(row[2])}
+        if row[01] in dic:
+            dic[row[1]][row[0]] = float(row[2])
+        else:
+            dic[row[1]] = {row[0]:float(row[2])}
+    return dic
+
+def readInNodeFlows():
+    File = open('nodeFlows.txt', 'r')
+    data = File.read()
+    File.close()
+    data = data.split('\n')
+    data.pop()
+    demo = {}
+    head = data.pop(0)
+    head = head.split('\t')
+    print head
+    for i in range(1, len(head)):
+        demo[head[i]] = {}
+        for j in data:
+            row = j.split('\t')
+            print i, row[0]
+            demo[head[i]][row[0]] = row[i]
+    return demo
+
+def normalizeDic(dic):
+    high = 0
+    for i in dic:
+        if dic[i] > high:
+            high = dic[i]
+    for i in dic:
+        dic[i] = float(dic[i])/high
+    return
+
+def normalizeDicDic(dic):
+    high = 0
+    for i in dic:
+        for j in dic[i]:
+            if dic[i][j] > high:
+                high = dic[i][j]
+    for i in dic:
+        for j in dic[i]:
+            dic[i][j] = float(dic[i][j])/high
+    return
+
+def writeNodeVals():
+    badger, matrix = readIn()
+    #matrix = readInTest()
+    #badger = readSTest()
+    print 'read in matrix'
+    sys.stdout.flush()
+    scores = flowBetweenness(matrix, badger, 'node')
+    File = open('nodeFlows.txt', 'w')
+    key = scores[scores.keys()[0]].keys()
+    File.write('Bader')
+    for i in key:
+        File.write('\t' + i)
+    File.write('\n')
+    for i in scores:
+        File.write(i)
+        for j in key:
+            File.write('\t' + str(scores[i][j]))
+        File.write('\n')
+    return
+
+def readInEdges(name):
+    File = open(name, 'r')
+    data = File.read()
+    File.close()
+
+    data = data.split('\n')
+    data.pop()
+    edges = []
+    for i in data:
+        edge = i.split('\t')
+        edges.append(frozenset(edge))
+    return edges
+
+
 def main():
-    badgers, matrix = readIn()
+    '''badgers, matrix = readIn()
     test = readInTest()
 
     path = depthFirstSearch(test, 'a', 'd')
@@ -486,7 +582,7 @@ def main():
     scores = flowBetweenness(test, social, 'edge')
     for i in scores:
         for j in scores[i]:
-            print i, j, scores[i][j]
+            print i, j, scores[i][j]'''
     '''edgeOrder = GNmethod(test)
     print 'done with part 1'
     sys.stdout.flush()
@@ -498,6 +594,12 @@ def main():
     groupSum = averageINGroups(badgers, inGroup, matrix)
     makeHistogram(inGroup, matrix, groupSum)
     '''
+    #writeEdgeFlows()
+    #writeNodeVals()
+    #writeNGresults()
+    '''edges = readInEdges('GN-raw-list')
+    for i in edges:
+        print i'''
 
 
 
