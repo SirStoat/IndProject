@@ -506,13 +506,11 @@ def readInNodeFlows():
     demo = {}
     head = data.pop(0)
     head = head.split('\t')
-    print head
     for i in range(1, len(head)):
         demo[head[i]] = {}
         for j in data:
             row = j.split('\t')
-            print i, row[0]
-            demo[head[i]][row[0]] = row[i]
+            demo[head[i]][row[0]] = float(row[i])
     return demo
 
 def normalizeDic(dic):
@@ -522,7 +520,7 @@ def normalizeDic(dic):
             high = dic[i]
     for i in dic:
         dic[i] = float(dic[i])/high
-    return
+    return dic
 
 def normalizeDicDic(dic):
     high = 0
@@ -539,8 +537,6 @@ def writeNodeVals():
     badger, matrix = readIn()
     #matrix = readInTest()
     #badger = readSTest()
-    print 'read in matrix'
-    sys.stdout.flush()
     scores = flowBetweenness(matrix, badger, 'node')
     File = open('nodeFlows.txt', 'w')
     key = scores[scores.keys()[0]].keys()
