@@ -429,10 +429,8 @@ def GNGroups(edges, graph, number):
             dic[i][j] = graph[i][j]
     graph = dic
     while len(groups) < number and len(edges) > 0:
-        print len(groups), len(edges)
         sys.stdout.flush()
         edge = edges.pop(0)
-        print edge
         outKey = graph.keys()
         for i in outKey:
             inKey = graph[i].keys()
@@ -440,7 +438,7 @@ def GNGroups(edges, graph, number):
                 if edge == frozenset([i,j]):
                     graph[i].pop(j)
         groups = getAllCCs(graph)
-    return groups
+    return groups, graph
 
 def writeEdgeFlows():
     badger, matrix = readIn()
@@ -531,7 +529,7 @@ def normalizeDicDic(dic):
     for i in dic:
         for j in dic[i]:
             dic[i][j] = float(dic[i][j])/high
-    return
+    return dic
 
 def writeNodeVals():
     badger, matrix = readIn()
