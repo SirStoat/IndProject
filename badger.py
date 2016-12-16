@@ -3,7 +3,11 @@ import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 import sys
-
+##
+#This reads in the the badger matrix file (BadgerMatrix.txt) and the badger info file
+#(BadgerInfo.txt) and creates a data object for the matrix and the info
+#Matrix: dictionary of dictionaries key1 source, key2 target, value: weight
+#Info: key1 badger, key2 type of info, value: value
 def readIn():
     File = open('BadgerMatrix.txt')
     matrix = File.read()
@@ -36,6 +40,9 @@ def readIn():
                 network[badger][badgers[j]] = row[j]
     return badgerDemo, network
 
+##
+#reads in the toy matrix
+#same as normal read in
 def readInTest():
     File = open('test.txt', 'r')
     data = File.read()
@@ -57,6 +64,9 @@ def readInTest():
                 dic[head[i]][head[j]] = num
     return dic
 
+##
+#input: graph in dic of dic format
+#output: list of edges: in either list or frozenset format
 def getEdgesList(dic, isSet=False):
     edges = []
     for i in dic:
@@ -69,6 +79,9 @@ def getEdgesList(dic, isSet=False):
                     edges.append(frozenset([i,j]))
     return edges
 
+##
+#input: graph in form of dic of dics
+#output: list of nodes
 def getNodes(dic):
     nodes = []
     for i in dic:
@@ -79,6 +92,8 @@ def getNodes(dic):
                 nodes.append(j)
     return nodes
 
+##
+#test function, no longer needed
 def getSubgraph(info, groups, matrix):
     subgraph = {}
     badgers = []
@@ -94,6 +109,8 @@ def getSubgraph(info, groups, matrix):
                     subgraph[i][j] = matrix[i][j]
     return subgraph
 
+##
+#test function, i don't know why i have it now
 def getPercentInGroup(info, matrix):
     out = {}
     for i in matrix:
@@ -106,6 +123,8 @@ def getPercentInGroup(info, matrix):
         out[i] = float(inGroup)/len(matrix[i].keys())
     return out
 
+##
+#visualizing stuff
 def makeHistogram(inGroup, matrix, groupSum):
     pIG = []
     for i in inGroup:
@@ -123,6 +142,8 @@ def makeHistogram(inGroup, matrix, groupSum):
         print '\\hline'
     plt.savefig('writeup/proportionInOut.png')
 
+##
+#visualizing stuff
 def averageINGroups(info, inGroup, matrix):
     groups = {}
     for i in info:
@@ -134,6 +155,9 @@ def averageINGroups(info, inGroup, matrix):
             groups[group] = {'Percent':inGroup[i]*len(matrix[i].keys()), 'number':len(matrix[i].keys())}
     return groups
 
+##
+#input: start, end, dictionary
+#output: a path using depth first search
 def depthFirstSearch(dic, start, target):
     nodes = getNodes(dic)
     disc = [start]
@@ -155,6 +179,8 @@ def depthFirstSearch(dic, start, target):
                 disc.append(nxt)
     return path
 
+##
+#Helper for fordfulkerson subtracts vales of two graphs from each other
 def getResidual(graph, flow):
     res = {}
     for i in graph:
@@ -163,6 +189,9 @@ def getResidual(graph, flow):
             res[i][j] = graph[i][j] - flow[i][j]
     return res
 
+##
+#Helper for flowBetweenness
+#using fordFulkerson method to find flows on graph givin start and end
 def fordFulkerson(graph, source, target):
     flow = {}
     #initiate flow graph
@@ -189,6 +218,9 @@ def fordFulkerson(graph, source, target):
         path = depthFirstSearch(res, source, target)
     return flow
 
+##
+#helper for flowBetweeness
+#adds up flows from edges gotten by fordFulkerson
 def getNodeFlows(flows, nodes, source, target):
     dic = {}
     total = 0
@@ -203,12 +235,19 @@ def getNodeFlows(flows, nodes, source, target):
         dic[i] = score
     return dic
 
+##
+#makes sure edge flows are posative
 def getedgeFlows(flows):
     for i in flows:
         for j in flows[i]:
             flows[i][j] = abs(flows[i][j])
     return flows
 
+##
+#Input: graph, social info, and whether you want node or edge flows
+#output:Nodes: three dicitonaries for flow betweenness between groups
+#               within groups and inter groups
+#       Edges: one dic dic of a graph with edge weight as flowBetweenness
 def flowBetweenness(graph, social, placement = 'node'):
     nodes = getNodes(graph)
     scores = {}
@@ -256,6 +295,8 @@ def flowBetweenness(graph, social, placement = 'node'):
     elif placement == 'edge':
         return edgeFlows
 
+##
+#Reads in a social groups for toy graph
 def readSTest():
     File = open('testS.txt')
     data = File.read()
@@ -268,6 +309,8 @@ def readSTest():
         dic[row[0]] = row[1]
     return dic
 
+##
+#helper function for GNmethod, helps make paths
 def addPaths(path, old, new, action):
     if action == 'replace':
         oldPath = path[old]
@@ -282,6 +325,8 @@ def addPaths(path, old, new, action):
             newPath[i] = oldPath[i] + [frozenset([old, new])]
         path[new] = path[new] + newPath
 
+##
+#Helper function for dist
 def addtoQ(Q, thing, dist):
     i = 0
     added = False
@@ -295,6 +340,9 @@ def addtoQ(Q, thing, dist):
         Q.append(thing)
     return Q
 
+##
+#helper function for GNmethod
+#finds shortest paths
 def dist(graph, start, target):
     Q = [start]
     dist = {Q[0]:0}
@@ -314,6 +362,9 @@ def dist(graph, start, target):
     else:
         return []
 
+##
+#Helper for GNmethod
+#sums paths for betweennes score
 def sumAllMatrix(dic):
     edges = {}
     for i in dic:
@@ -324,6 +375,9 @@ def sumAllMatrix(dic):
         edges[i] = sm
     return edges
 
+##
+#helper for GNmethod
+#helps with Betweeness score
 def Betweeness(paths, edges):
     dic = {}
     for i in edges:
@@ -339,6 +393,9 @@ def Betweeness(paths, edges):
         dic[i] = matrix
     return dic
 
+##
+#helper for GNmehtod
+#updates betweennes scores after edge removel
 def updateBetweeness(paths, matrixes, edge, edges, graph):
     update = []
     for i in paths:
@@ -362,6 +419,10 @@ def updateBetweeness(paths, matrixes, edge, edges, graph):
                 matrixes[j][i[0]][i[1]] = 0
     return
 
+##
+#Input: a graph
+#output: a list of edges (list)
+#edges are in the order that they were removed in GNmethod
 def GNmethod(graph):
     paths = {}
     tree = {}
@@ -396,6 +457,10 @@ def GNmethod(graph):
         updateBetweeness(paths, matrixes, edge, edges, graph)
     return orderRemoved
 
+##
+#helper for getAllCCs
+#takes graph and starting point
+#gives a connected component: lists of nodes
 def getCC(graph, start):
     Q = [start]
     cc = [start]
@@ -409,6 +474,10 @@ def getCC(graph, start):
                 Q.append(i)
     return cc
 
+##
+#helper for GNGroups
+#input: a graph
+#output: list of all connected components
 def getAllCCs(graph):
     nodes = getNodes(graph)
     allCCs = []
@@ -419,6 +488,9 @@ def getAllCCs(graph):
             nodes.remove(i)
     return allCCs
 
+##
+#Gets output from GNMethod (edges) and a graph and number of groups
+#output is a list of groupss of the number inputed
 def GNGroups(edges, graph, number):
     edges = edges[:]
     groups = []
@@ -440,6 +512,8 @@ def GNGroups(edges, graph, number):
         groups = getAllCCs(graph)
     return groups, graph
 
+##
+#Writes output from node flowBetweenness
 def writeEdgeFlows():
     badger, matrix = readIn()
     #matrix = readInTest()
@@ -457,6 +531,8 @@ def writeEdgeFlows():
     File.close()
     return
 
+##
+#writes output from GNmethod
 def writeNGresults():
     badger, matrix = readIn()
     #matrix = readInTest()
@@ -476,6 +552,8 @@ def writeNGresults():
     File.close()
     return
 
+##
+#reads in output of writeEdgeFlows
 def readInEdgeFlows():
     File = open('edgeFlow.txt', 'r')
     data = File.read()
@@ -495,6 +573,8 @@ def readInEdgeFlows():
             dic[row[1]] = {row[0]:float(row[2])}
     return dic
 
+##
+#reads in output of writeNodeVals
 def readInNodeFlows():
     File = open('nodeFlows.txt', 'r')
     data = File.read()
@@ -511,26 +591,8 @@ def readInNodeFlows():
             demo[head[i]][row[0]] = float(row[i])
     return demo
 
-def normalizeDic(dic):
-    high = 0
-    for i in dic:
-        if dic[i] > high:
-            high = dic[i]
-    for i in dic:
-        dic[i] = float(dic[i])/high
-    return dic
-
-def normalizeDicDic(dic):
-    high = 0
-    for i in dic:
-        for j in dic[i]:
-            if dic[i][j] > high:
-                high = dic[i][j]
-    for i in dic:
-        for j in dic[i]:
-            dic[i][j] = float(dic[i][j])/high
-    return dic
-
+##
+#reads in output of writeEdgeFlows
 def writeNodeVals():
     badger, matrix = readIn()
     #matrix = readInTest()
@@ -549,6 +611,32 @@ def writeNodeVals():
         File.write('\n')
     return
 
+##
+#normalizes dicitonaries
+def normalizeDic(dic):
+    high = 0
+    for i in dic:
+        if dic[i] > high:
+            high = dic[i]
+    for i in dic:
+        dic[i] = float(dic[i])/high
+    return dic
+
+##
+#mamalizes dictionaris of dicitonaries
+def normalizeDicDic(dic):
+    high = 0
+    for i in dic:
+        for j in dic[i]:
+            if dic[i][j] > high:
+                high = dic[i][j]
+    for i in dic:
+        for j in dic[i]:
+            dic[i][j] = float(dic[i][j])/high
+    return dic
+
+##
+#reads in output of writeNGresults
 def readInEdges(name):
     File = open(name, 'r')
     data = File.read()
@@ -594,12 +682,3 @@ def main():
     '''edges = readInEdges('GN-raw-list')
     for i in edges:
         print i'''
-
-
-
-
-
-
-
-if __name__ == '__main__':
-    main()
